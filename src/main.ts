@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { Logger } from '@nestjs/common';
 import { envs } from './config';
 import { ValidationPipe } from '@nestjs/common';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
 
@@ -19,6 +20,14 @@ async function bootstrap() {
     })
   )
 
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.NATS,
+    options: {
+      servers: [envs.NATS_SERVERS]
+    }
+  }, { inheritAppConfig: true });
+
+  await app.startAllMicroservices();
   await app.listen(envs.PORT);
 
   logger.log(`PaymentsMicroservice is running on port ${envs.PORT}`)
